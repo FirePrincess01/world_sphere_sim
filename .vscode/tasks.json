@@ -33,8 +33,7 @@
                 "isDefault": true
             },
             "problemMatcher": {
-                "base": "$gcc",
-                "fileLocation": ["relative", "${workspaceRoot}/build"]
+                "base": "$msCompile"
             },
             "presentation": {
                 "echo": true,

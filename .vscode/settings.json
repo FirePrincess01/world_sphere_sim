@@ -52,6 +52,25 @@
         "xstddef": "cpp",
         "xstring": "cpp",
         "xtr1common": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "any": "cpp",
+        "array": "cpp",
+        "condition_variable": "cpp",
+        "cstdarg": "cpp",
+        "functional": "cpp",
+        "iostream": "cpp",
+        "map": "cpp",
+        "mutex": "cpp",
+        "optional": "cpp",
+        "ranges": "cpp",
+        "set": "cpp",
+        "span": "cpp",
+        "sstream": "cpp",
+        "thread": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "variant": "cpp",
+        "xhash": "cpp",
+        "xtree": "cpp"
     }
 }

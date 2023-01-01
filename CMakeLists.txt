@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Create the project
-project("CodeLife" CXX)
+project("world_sphere_sim" CXX)
 
 # Export compile commands for VSCode C++ Intellisense
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -36,3 +36,7 @@ file(GLOB SOURCE_FILES CONFIGURE_DEPENDS
 )
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCE_FILES})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE vulkan_particle_engine)
+
+add_subdirectory(vulkan_particle_engine)
