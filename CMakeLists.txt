@@ -37,6 +37,6 @@ file(GLOB SOURCE_FILES CONFIGURE_DEPENDS
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE vulkan_particle_engine)
 
 add_subdirectory(vulkan_particle_engine)
+target_link_libraries(${PROJECT_NAME} PRIVATE vulkan_particle_engine)
