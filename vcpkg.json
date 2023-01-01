@@ -1,0 +1,12 @@
+{
+    "name": "world-sphere-sim",
+    "version-string": "0.0.1",
+    "dependencies": [
+      "glm",
+      "glfw3",
+      "vulkan",
+      "gtest"
+    ]
+  }
+
+   

@@ -1,0 +1,6 @@
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/microsoft/vcpkg.git
+[submodule "vulkan_particle_engine"]
+	path = vulkan_particle_engine
+	url = https://github.com/FirePrincess01/vulkan_particle_engine.git
