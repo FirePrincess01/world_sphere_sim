@@ -43,19 +43,33 @@ find_package(Vulkan REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Vulkan::Vulkan)
 add_executable(embedfile "${CMAKE_SOURCE_DIR}/embedfile/embedfile.cpp")
 
-set(sphere_fragment_shader_glsl "${CMAKE_SOURCE_DIR}/source/sphere/sphere_fragment_shader.vert")
-set(sphere_fragment_shader_spv "${CMAKE_BINARY_DIR}/shaders/sphere/sphere_fragment_shader.spv")
-set(sphere_fragment_shader_cpp "${CMAKE_BINARY_DIR}/shaders/sphere/sphere_fragment_shader.h")
-add_custom_command(
-    DEPENDS ${sphere_fragment_shader_glsl}
-    OUTPUT ${sphere_fragment_shader_cpp}
-    COMMAND Vulkan::glslc ${sphere_fragment_shader_glsl} -O -o ${sphere_fragment_shader_spv}
-    COMMAND embedfile sphere_fragment_shader ${sphere_fragment_shader_spv} ${sphere_fragment_shader_cpp}
+file(GLOB SHADER_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_SOURCE_DIR}/shaders/sphere/*.frag"
+    "${CMAKE_SOURCE_DIR}/shaders/sphere/*.vert"
+    "${CMAKE_SOURCE_DIR}/shaders/sphere/*.geom"
 )
-target_sources(${PROJECT_NAME} PRIVATE ${sphere_fragment_shader_cpp})
+
+foreach(SHADER_SOURCE ${SHADER_SOURCES})
+    get_filename_component(file_c ${SHADER_SOURCE} NAME)
+    string(REPLACE "." "_" file_c_2 ${file_c})
+
+    set(SHADER_SPV ${CMAKE_BINARY_DIR}/shaders/${file_c_2}.spv)
+    set(SHADER_HEADER ${CMAKE_BINARY_DIR}/shaders/${file_c_2}.h)
+
+    add_custom_command(
+        OUTPUT ${SHADER_HEADER}
+        DEPENDS ${SHADER_SOURCE}
+        COMMAND Vulkan::glslc ${SHADER_SOURCE} -O -o ${SHADER_SPV}
+        COMMAND embedfile ${file_c_2} ${SHADER_SPV} ${SHADER_HEADER}
+    )
+    target_sources(${PROJECT_NAME} PRIVATE ${SHADER_HEADER})
+endforeach()
+
 target_include_directories(${PROJECT_NAME} PRIVATE  
-    "${CMAKE_BINARY_DIR}/shaders"
+    ${CMAKE_BINARY_DIR}/shaders/
 )
+
+
 # include subprojects
 add_subdirectory(vulkan_particle_engine)
 target_link_libraries(${PROJECT_NAME} PRIVATE vulkan_particle_engine)
