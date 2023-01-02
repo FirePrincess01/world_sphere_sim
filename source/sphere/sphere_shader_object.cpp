@@ -49,27 +49,42 @@ void SphereShaderObject::setup(RenderEngineInterface & engine)
 
 void SphereShaderObject::draw(RenderEngineInterface & engine, size_t const imageIndex)
 {
-    Delegate<void(VertexBufferElement *, size_t)> funcVertex;
-    funcVertex.set<&SphereShaderObject::doUpdateVertexBuffer>(*this);
-    mVertexBuffer.update(engine, imageIndex, funcVertex);
+	// init data
+	if(mInit++ < engine.getSwapChainSize())
+	{
+		if(initVertexBuffer){
+			mVertexBuffer.update(engine, imageIndex, initVertexBuffer);
+		}
 
-    Delegate<void(ColorBufferElement *, size_t)> funcColor;
-    funcColor.set<&SphereShaderObject::doUpdateColorBuffer>(*this);
-    mColorBuffer.update(engine, imageIndex, funcColor);
+		if(initColorBuffer){
+			mColorBuffer.update(engine, imageIndex, initColorBuffer);
+		}
 
-    Delegate<void(IndexBufferElement *, size_t)> funcIndex;
-    funcIndex.set<&SphereShaderObject::doUpdateIndexBuffer>(*this);
-    mIndexBuffer.update(engine, imageIndex, funcIndex);
+		if(initIndexBuffer){
+			mIndexBuffer.update(engine, imageIndex, initIndexBuffer);
+		}
+	}
 
-    Delegate<void(UnformBuffer *, size_t)> funcUniform;
-    funcUniform.set<&SphereShaderObject::doUpdateUniformBuffer>(*this);
-    mUniformBuffer.update(engine, imageIndex, funcUniform);
+	// update data
+	if(updateVertexBuffer){
+		mVertexBuffer.update(engine, imageIndex, updateVertexBuffer);
+	}
+
+	if(updateColorBuffer){
+		mColorBuffer.update(engine, imageIndex, updateColorBuffer);
+	}
+
+	if(updateIndexBuffer){
+		mIndexBuffer.update(engine, imageIndex, updateIndexBuffer);
+	}
+
+	if(updateUniformBuffer){
+		mUniformBuffer.update(engine, imageIndex, updateUniformBuffer);
+	}
 }
 
 void SphereShaderObject::cleanup(RenderEngineInterface & engine)
 {
-    // mCommands.clear();
-    
     mPipeline.clear();
 
     mDescriptorSets.clear();
@@ -80,6 +95,8 @@ void SphereShaderObject::cleanup(RenderEngineInterface & engine)
     mIndexBuffer.clear();
     mColorBuffer.clear();
     mVertexBuffer.clear();
+
+	mInit = 0;
 }
 
 void SphereShaderObject::recordCommands(RenderEngineInterface& engine)

@@ -41,6 +41,15 @@ public:
 		alignas(4)  float ambient;
 	};
 
+	Delegate<void(std::span<VertexBufferElement>)> updateVertexBuffer;
+	Delegate<void(std::span<ColorBufferElement>)>  updateColorBuffer;
+	Delegate<void(std::span<IndexBufferElement>)>  updateIndexBuffer;
+	Delegate<void(std::span<UnformBuffer>)> updateUniformBuffer;
+
+	Delegate<void(std::span<VertexBufferElement>)> initVertexBuffer;
+	Delegate<void(std::span<ColorBufferElement>)>  initColorBuffer;
+	Delegate<void(std::span<IndexBufferElement>)>  initIndexBuffer;
+
 	SphereShaderObject(size_t const vertexBufferSize, size_t const indexBufferSize);
 
 	// inherited functions
@@ -48,16 +57,11 @@ public:
     void draw(RenderEngineInterface&, size_t const imageIndex) final;
     void cleanup(RenderEngineInterface&) final;
 
-protected:
-    virtual void doUpdateVertexBuffer(VertexBufferElement vertexBuffer[], size_t const size) = 0;
-    virtual void doUpdateColorBuffer(ColorBufferElement colorBuffer[], size_t const size) = 0;
-    virtual void doUpdateIndexBuffer(IndexBufferElement indexBuffer[], size_t const size) = 0;
-    virtual void doUpdateUniformBuffer(UnformBuffer uniformBuffer[], size_t const size) = 0;
-
 private:
 
 	size_t const mVertexBufferSize;
 	size_t const mIndexBufferSize;
+	uint32_t mInit = 0;
 
     MemoryMappedBuffer<VertexBufferElement> mVertexBuffer { vk::BufferUsageFlagBits::eVertexBuffer };
     MemoryMappedBuffer<ColorBufferElement> mColorBuffer { vk::BufferUsageFlagBits::eVertexBuffer };
