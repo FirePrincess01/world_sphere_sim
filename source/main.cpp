@@ -13,8 +13,29 @@
 #include "geometry/sphere.h"
 
 #include <iostream>
+#include <glm/gtx/color_space.hpp>
 
 using namespace std;
+
+
+std::vector<glm::vec3> rainbow(size_t const size)
+{
+    std::vector<glm::vec3> data;
+    data.reserve(size);
+
+    float hue = 0.0f;
+    float sat = 1.0f;
+    float value = 1.0f;
+    for(size_t i = 0; i < size; ++i)
+    {
+        auto const color = glm::rgbColor(glm::vec3(hue, sat, value));
+        hue += 360.0f / size;
+
+        data.push_back(color);
+    }
+
+    return data;
+}
 
 
 class Cube
@@ -71,16 +92,19 @@ private:
     std::vector<AdvancedShader::VertexBufferElement> const vertexData;
 
     // std::array<glm::vec3, 36> const cube_vertices = createCubeTriangles();
-    std::vector<glm::vec3> const cube_vertices = flatSphereData(createSphereVertices(2.0f, 10));
+    std::vector<glm::vec3> const cube_vertices = createSphereTriangles(createSphereVertices(2.0f, 100));
 
-    std::array<glm::vec3, 6>  const cube_colors2 = {
-        glm::vec3(0.5f, 0.5f, 0.5f),
-        glm::vec3(0.1f, 0.5f, 0.5f),
-        glm::vec3(0.5f, 0.1f, 0.5f),
-        glm::vec3(0.5f, 0.5f, 0.1f),
-        glm::vec3(0.5f, 0.1f, 0.1f),
-        glm::vec3(0.1f, 0.1f, 0.5f)
-    };
+    std::vector<glm::vec3> const cube_colors2 = rainbow(cube_vertices.size() / 6);
+
+
+    // std::array<glm::vec3, 6>  const cube_colors2 = {
+    //     glm::vec3(0.5f, 0.5f, 0.5f),
+    //     glm::vec3(0.1f, 0.5f, 0.5f),
+    //     glm::vec3(0.5f, 0.1f, 0.5f),
+    //     glm::vec3(0.5f, 0.5f, 0.1f),
+    //     glm::vec3(0.5f, 0.1f, 0.1f),
+    //     glm::vec3(0.1f, 0.1f, 0.5f)
+    // };
 
     SphereShaderObject mShaderObject = SphereShaderObject(cube_vertices.size(), cube_colors2.size());
 

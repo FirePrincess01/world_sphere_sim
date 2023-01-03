@@ -12,10 +12,11 @@ SphereShaderObject::SphereShaderObject(size_t const vertexBufferSize, size_t con
     : mVertexBufferSize(vertexBufferSize),
       mColorBufferSize(colorBufferSize)
 {
-	// if(vertexBufferSize != mColorBufferSize * 6)
-	// {
-	// 	throw std::exception("mIndexBufferSize != mColorBufferSize * 6");
-	// }
+	if(vertexBufferSize != mColorBufferSize * 6)
+	{
+		assert(false);
+		throw std::exception("mIndexBufferSize != mColorBufferSize * 6");
+	}
 }
 
 
@@ -206,5 +207,6 @@ std::span<char const> SphereShaderObject::getFragmentShaderCode() const
 
 vk::PrimitiveTopology SphereShaderObject::getInputTopology() const
 {
-	return vk::PrimitiveTopology::ePointList;
+	// return vk::PrimitiveTopology::ePointList;
+	return vk::PrimitiveTopology::eTriangleList;
 }

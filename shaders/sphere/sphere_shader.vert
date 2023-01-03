@@ -45,8 +45,7 @@ void main()
 
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
     gl_PointSize = 1.0f;
-    // fragColor = inColor;
 
-    uint color_index = min(i/6, 5);
+    uint color_index = i/6;
     fragColor = vec3(sbo.elems[color_index].r, sbo.elems[color_index].g, sbo.elems[color_index].b);
 }
