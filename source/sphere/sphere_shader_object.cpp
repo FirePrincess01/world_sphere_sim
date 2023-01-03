@@ -8,12 +8,11 @@
 #include "sphere_shader_object.h"
 
 
-SphereShaderObject::SphereShaderObject(size_t const vertexBufferSize, size_t const indexBufferSize, size_t const colorBufferSize)
+SphereShaderObject::SphereShaderObject(size_t const vertexBufferSize, size_t const colorBufferSize)
     : mVertexBufferSize(vertexBufferSize),
-      mIndexBufferSize(indexBufferSize),
       mColorBufferSize(colorBufferSize)
 {
-	if(mIndexBufferSize != mColorBufferSize * 6)
+	if(vertexBufferSize != mColorBufferSize * 6)
 	{
 		throw std::exception("mIndexBufferSize != mColorBufferSize * 6");
 	}
@@ -24,9 +23,7 @@ void SphereShaderObject::setup(RenderEngineInterface & engine)
 {   
     // vertex buffer
     mVertexBuffer.create(engine, mVertexBufferSize);
-    mColorBuffer.create(engine, mVertexBufferSize);
     mColorBuffer2.create(engine, mColorBufferSize);
-    mIndexBuffer.create(engine, mIndexBufferSize);
     
     // uniform buffer
     mUniformBuffer.create(engine, 1);
@@ -64,16 +61,8 @@ void SphereShaderObject::draw(RenderEngineInterface & engine, size_t const image
 			mVertexBuffer.update(engine, imageIndex, initVertexBuffer);
 		}
 
-		if(initColorBuffer){
-			mColorBuffer.update(engine, imageIndex, initColorBuffer);
-		}
-
 		if(initColorBuffer2){
 			mColorBuffer2.update(engine, imageIndex, initColorBuffer2);
-		}
-
-		if(initIndexBuffer){
-			mIndexBuffer.update(engine, imageIndex, initIndexBuffer);
 		}
 	}
 
@@ -84,14 +73,6 @@ void SphereShaderObject::draw(RenderEngineInterface & engine, size_t const image
 
 	if(updateColorBuffer2){
 		mColorBuffer2.update(engine, imageIndex, updateColorBuffer2);
-	}
-
-	if(updateColorBuffer){
-		mColorBuffer.update(engine, imageIndex, updateColorBuffer);
-	}
-
-	if(updateIndexBuffer){
-		mIndexBuffer.update(engine, imageIndex, updateIndexBuffer);
 	}
 
 	if(updateUniformBuffer){
@@ -108,9 +89,7 @@ void SphereShaderObject::cleanup(RenderEngineInterface & engine)
     mDescriptorSetLayout.clear();
     mUniformBuffer.clear();
 
-    mIndexBuffer.clear();
     mColorBuffer2.clear();
-    mColorBuffer.clear();
     mVertexBuffer.clear();
 
 	mInit = 0;
@@ -121,8 +100,7 @@ void SphereShaderObject::recordCommands(RenderEngineInterface& engine)
 	assert(mPipeline.getPipelineLayout());
 	assert(mPipeline.getPipeline());
 	assert(!mVertexBuffer.getBuffers().empty());
-	assert(!mColorBuffer.getBuffers().empty());
-	assert(!mIndexBuffer.getBuffers().empty());
+	assert(!mColorBuffer2.getBuffers().empty());
 	assert(!mUniformBuffer.getBuffers().empty());
 	assert(!mDescriptorSets.getDescriptorSets().empty());
 
@@ -133,13 +111,10 @@ void SphereShaderObject::recordCommands(RenderEngineInterface& engine)
 		commandBuffers[i]->bindPipeline(vk::PipelineBindPoint::eGraphics, mPipeline.getPipeline());
 
 		commandBuffers[i]->bindVertexBuffers(0, mVertexBuffer.getBuffers()[i].get(), vk::DeviceSize(0));
-		commandBuffers[i]->bindVertexBuffers(1, mColorBuffer.getBuffers()[i].get(), vk::DeviceSize(0));
-        commandBuffers[i]->bindIndexBuffer(mIndexBuffer.getBuffers()[i].get(), 0, vk::IndexType::eUint32);
 
 		commandBuffers[i]->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, mPipeline.getPipelineLayout(), 0, mDescriptorSets.getDescriptorSets()[i], nullptr);
 
 		commandBuffers[i]->draw(static_cast<uint32_t>(mVertexBufferSize), 1, 0, 0);
-		// commandBuffers[i]->drawIndexed(mIndexBufferSize, 1, 0, 0, 0);
 	}
 }
 
@@ -147,7 +122,7 @@ void SphereShaderObject::recordCommands(RenderEngineInterface& engine)
 std::vector<vk::VertexInputAttributeDescription> SphereShaderObject::getVertexAttributeDescriptions() const
 {
 	std::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
-	attributeDescriptions.resize(3);
+	attributeDescriptions.resize(2);
 	attributeDescriptions[0].setBinding(0);
 	attributeDescriptions[0].setLocation(0);
 	attributeDescriptions[0].setFormat(vk::Format::eR32G32B32Sfloat);
@@ -158,26 +133,17 @@ std::vector<vk::VertexInputAttributeDescription> SphereShaderObject::getVertexAt
 	attributeDescriptions[1].setFormat(vk::Format::eR32G32B32Sfloat);
 	attributeDescriptions[1].setOffset(offsetof(VertexBufferElement, normal));
 
-	attributeDescriptions[2].setBinding(1);
-	attributeDescriptions[2].setLocation(2);
-	attributeDescriptions[2].setFormat(vk::Format::eR32G32B32Sfloat);
-	attributeDescriptions[2].setOffset(offsetof(ColorBufferElement, color));
-
 	return attributeDescriptions;
 }
 
 std::vector<vk::VertexInputBindingDescription> SphereShaderObject::getVertexBindingDescription() const
 {
 	std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
-    bindingDescriptions.resize(2);
+    bindingDescriptions.resize(1);
 
 	bindingDescriptions[0].setBinding(0);
 	bindingDescriptions[0].setStride(sizeof(VertexBufferElement));
 	bindingDescriptions[0].setInputRate(vk::VertexInputRate::eVertex);
-
-	bindingDescriptions[1].setBinding(1);
-	bindingDescriptions[1].setStride(sizeof(ColorBufferElement));
-	bindingDescriptions[1].setInputRate(vk::VertexInputRate::eVertex);
 
 	return bindingDescriptions;
 }

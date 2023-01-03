@@ -26,9 +26,7 @@ public:
       mProj(proj)
     {
         mShaderObject.updateVertexBuffer.set<&Cube::updateVertexData>(*this);
-        mShaderObject.updateColorBuffer.set<&Cube::updateColorData>(*this);
         mShaderObject.updateColorBuffer2.set<&Cube::updateColorData2>(*this);
-        mShaderObject.updateIndexBuffer.set<&Cube::updateIndexData>(*this);
         mShaderObject.updateUniformBuffer.set<&Cube::updateUniformData>(*this);
     }
 
@@ -45,15 +43,6 @@ public:
         }
     }
 
-    void updateColorData(std::span<SphereShaderObject::ColorBufferElement> data)
-    {
-        assert(data.size() >= cube_colors.size());
-        for(size_t i = 0; i < cube_colors.size(); ++i)
-        {
-            data[i].color = cube_colors[i];
-        }
-    }
-
     void updateColorData2(std::span<SphereShaderObject::ColorBufferElement2> data)
     {
         assert(data.size() == cube_colors2.size());
@@ -62,15 +51,6 @@ public:
             data[i].r = cube_colors2[i].r;
             data[i].g = cube_colors2[i].g;
             data[i].b = cube_colors2[i].b;
-        }
-    }
-
-    void updateIndexData(std::span<SphereShaderObject::IndexBufferElement> data)
-    {
-        assert(data.size() == cube_indices.size());
-        for(size_t i = 0; i < data.size(); ++i)
-        {
-            data[i].index = cube_indices[i];
         }
     }
 
@@ -112,7 +92,7 @@ private:
         glm::vec3(0.1f, 0.1f, 0.5f)
     };
 
-    SphereShaderObject mShaderObject = SphereShaderObject(cube_vertices.size(), cube_indices.size(), cube_colors2.size());
+    SphereShaderObject mShaderObject = SphereShaderObject(cube_vertices.size(), cube_colors2.size());
 
     glm::vec3 mPos;
 
