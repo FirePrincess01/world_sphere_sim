@@ -104,3 +104,16 @@ auto createCubeIndices()
     return data;
 }
 
+auto createCubeTriangles()
+{
+    auto vertices = createCubeVertices();
+    auto indices = createCubeIndices();
+
+    std::array<glm::vec3, indices.size()> data = {};
+
+    for(size_t i = 0; i < data.size(); ++i) {
+        data[i] = vertices[indices[i]];
+    }
+
+    return data;
+}

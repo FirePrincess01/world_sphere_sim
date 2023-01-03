@@ -10,9 +10,9 @@
 
 #include "vulkan_particle_engine/shader_object/shader_object.h"
 #include "vulkan_particle_engine/components/memory_mapped_buffer.h"
-#include "vulkan_particle_engine/components/simple_descriptor_sets.h"
+#include "vulkan_particle_engine/components/advanced_descriptor_sets.h"
 #include "vulkan_particle_engine/components/simple_descriptor_set_layout.h"
-#include "vulkan_particle_engine/components/simple_descriptor_pool.h"
+#include "vulkan_particle_engine/components/advanced_descriptor_pool.h"
 #include "vulkan_particle_engine/components/advanced_pipeline.h"
 #include "include_glm.h"
 
@@ -29,6 +29,13 @@ public:
 		glm::vec3 color;
 	};
 
+	struct ColorBufferElement2 {
+		// glm::vec3 color;
+		alignas(4) float r;
+		alignas(4) float g;
+		alignas(4) float b;
+	};
+
 	struct IndexBufferElement {
 		uint32_t index;
 	};
@@ -43,14 +50,16 @@ public:
 
 	Delegate<void(std::span<VertexBufferElement>)> updateVertexBuffer;
 	Delegate<void(std::span<ColorBufferElement>)>  updateColorBuffer;
+	Delegate<void(std::span<ColorBufferElement2>)>  updateColorBuffer2;
 	Delegate<void(std::span<IndexBufferElement>)>  updateIndexBuffer;
 	Delegate<void(std::span<UnformBuffer>)> updateUniformBuffer;
 
 	Delegate<void(std::span<VertexBufferElement>)> initVertexBuffer;
 	Delegate<void(std::span<ColorBufferElement>)>  initColorBuffer;
+	Delegate<void(std::span<ColorBufferElement2>)>  initColorBuffer2;
 	Delegate<void(std::span<IndexBufferElement>)>  initIndexBuffer;
 
-	SphereShaderObject(size_t const vertexBufferSize, size_t const indexBufferSize);
+	SphereShaderObject(size_t const vertexBufferSize, size_t const indexBufferSize, size_t const colorBufferSize);
 
 	// inherited functions
     void setup(RenderEngineInterface&) final;
@@ -61,16 +70,18 @@ private:
 
 	size_t const mVertexBufferSize;
 	size_t const mIndexBufferSize;
+	size_t const mColorBufferSize;
 	uint32_t mInit = 0;
 
     MemoryMappedBuffer<VertexBufferElement> mVertexBuffer { vk::BufferUsageFlagBits::eVertexBuffer };
     MemoryMappedBuffer<ColorBufferElement> mColorBuffer { vk::BufferUsageFlagBits::eVertexBuffer };
+    MemoryMappedBuffer<ColorBufferElement2> mColorBuffer2 { vk::BufferUsageFlagBits::eStorageBuffer };
     MemoryMappedBuffer<IndexBufferElement> mIndexBuffer { vk::BufferUsageFlagBits::eIndexBuffer };
     MemoryMappedBuffer<UnformBuffer> mUniformBuffer { vk::BufferUsageFlagBits::eUniformBuffer };
 
     SimpleDescriptorSetLayout mDescriptorSetLayout;
-    SimpleDescriptorPool mDescriptorPool;
-    SimpleDescriptorSets mDescriptorSets;
+    AdvancedDescriptorPool mDescriptorPool;
+    AdvancedDescriptorSets mDescriptorSets;
 
     AdvancedGraphicsPipeline mPipeline;
 
@@ -87,6 +98,7 @@ private:
 	std::vector<vk::VertexInputBindingDescription> getVertexBindingDescription() const;
 
 	std::vector<vk::DescriptorSetLayoutBinding> getUniformBindingDescription() const;
+	std::vector<vk::DescriptorPoolSize> getUniformDescriptorPoolSizes(uint32_t const swapChainSize) const;
 };
 
 

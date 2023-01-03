@@ -17,6 +17,18 @@ layout(binding = 0) uniform UniformBufferObject
     float ambient;
 } ubo;
 
+struct StorageBufferElement
+{
+    float r;
+    float g;
+    float b;
+};
+
+layout(std430, binding = 1) readonly buffer StorageBufferObject
+{
+    StorageBufferElement elems[];
+} sbo;
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec3 inColor;
@@ -27,9 +39,14 @@ layout(location = 2) out vec3 normal;
 
 void main() 
 {
+    uint i = gl_VertexIndex;
+
     position = (ubo.model * vec4(inPosition, 1.0)).xyz;
     normal = inNormal;
 
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
-    fragColor = inColor;
+    // fragColor = inColor;
+
+    uint color_index = min(i/6, 6);
+    fragColor = vec3(sbo.elems[color_index].r, sbo.elems[color_index].g, sbo.elems[color_index].b);
 }

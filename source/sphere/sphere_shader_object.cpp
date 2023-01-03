@@ -8,11 +8,15 @@
 #include "sphere_shader_object.h"
 
 
-SphereShaderObject::SphereShaderObject(size_t const vertexBufferSize, size_t const indexBufferSize)
+SphereShaderObject::SphereShaderObject(size_t const vertexBufferSize, size_t const indexBufferSize, size_t const colorBufferSize)
     : mVertexBufferSize(vertexBufferSize),
-      mIndexBufferSize(indexBufferSize)
+      mIndexBufferSize(indexBufferSize),
+      mColorBufferSize(colorBufferSize)
 {
-
+	if(mIndexBufferSize != mColorBufferSize * 6)
+	{
+		throw std::exception("mIndexBufferSize != mColorBufferSize * 6");
+	}
 }
 
 
@@ -21,17 +25,21 @@ void SphereShaderObject::setup(RenderEngineInterface & engine)
     // vertex buffer
     mVertexBuffer.create(engine, mVertexBufferSize);
     mColorBuffer.create(engine, mVertexBufferSize);
+    mColorBuffer2.create(engine, mColorBufferSize);
     mIndexBuffer.create(engine, mIndexBufferSize);
     
     // uniform buffer
     mUniformBuffer.create(engine, 1);
     mDescriptorSetLayout.createDescriptorSetLayout(engine, getUniformBindingDescription());
-    mDescriptorPool.createDescriptorPool(engine);
+    mDescriptorPool.createDescriptorPool(engine, getUniformDescriptorPoolSizes(engine.getSwapChainSize()));
+
     mDescriptorSets.createDescriptorSets(engine,
         mDescriptorPool.getDescriptorPool(),
         mDescriptorSetLayout.getDescriptorSetLayout(),
         mUniformBuffer.getBuffers(),
-        sizeof(UnformBuffer));
+        sizeof(UnformBuffer),
+		mColorBuffer2.getBuffers(),
+		sizeof(ColorBufferElement2) * mColorBufferSize);
 
     // pipeline
     mPipeline.createGraphicsPipeline(engine, 
@@ -60,6 +68,10 @@ void SphereShaderObject::draw(RenderEngineInterface & engine, size_t const image
 			mColorBuffer.update(engine, imageIndex, initColorBuffer);
 		}
 
+		if(initColorBuffer2){
+			mColorBuffer2.update(engine, imageIndex, initColorBuffer2);
+		}
+
 		if(initIndexBuffer){
 			mIndexBuffer.update(engine, imageIndex, initIndexBuffer);
 		}
@@ -68,6 +80,10 @@ void SphereShaderObject::draw(RenderEngineInterface & engine, size_t const image
 	// update data
 	if(updateVertexBuffer){
 		mVertexBuffer.update(engine, imageIndex, updateVertexBuffer);
+	}
+
+	if(updateColorBuffer2){
+		mColorBuffer2.update(engine, imageIndex, updateColorBuffer2);
 	}
 
 	if(updateColorBuffer){
@@ -93,6 +109,7 @@ void SphereShaderObject::cleanup(RenderEngineInterface & engine)
     mUniformBuffer.clear();
 
     mIndexBuffer.clear();
+    mColorBuffer2.clear();
     mColorBuffer.clear();
     mVertexBuffer.clear();
 
@@ -122,7 +139,7 @@ void SphereShaderObject::recordCommands(RenderEngineInterface& engine)
 		commandBuffers[i]->bindDescriptorSets(vk::PipelineBindPoint::eGraphics, mPipeline.getPipelineLayout(), 0, mDescriptorSets.getDescriptorSets()[i], nullptr);
 
 		commandBuffers[i]->draw(static_cast<uint32_t>(mVertexBufferSize), 1, 0, 0);
-		commandBuffers[i]->drawIndexed(mIndexBufferSize, 1, 0, 0, 0);
+		// commandBuffers[i]->drawIndexed(mIndexBufferSize, 1, 0, 0, 0);
 	}
 }
 
@@ -153,6 +170,7 @@ std::vector<vk::VertexInputBindingDescription> SphereShaderObject::getVertexBind
 {
 	std::vector<vk::VertexInputBindingDescription> bindingDescriptions;
     bindingDescriptions.resize(2);
+
 	bindingDescriptions[0].setBinding(0);
 	bindingDescriptions[0].setStride(sizeof(VertexBufferElement));
 	bindingDescriptions[0].setInputRate(vk::VertexInputRate::eVertex);
@@ -168,14 +186,39 @@ std::vector<vk::DescriptorSetLayoutBinding> SphereShaderObject::getUniformBindin
 {
 	// Uniform Buffer Layout
 	std::vector<vk::DescriptorSetLayoutBinding>  uboLayoutBinding;
-	uboLayoutBinding.resize(1);
+	uboLayoutBinding.resize(2);
+
+	// Uniform Buffer Layout
 	uboLayoutBinding[0].setBinding(0);
 	uboLayoutBinding[0].setDescriptorType(vk::DescriptorType::eUniformBuffer);
 	uboLayoutBinding[0].setDescriptorCount(1); // if it is an array of objects
 	uboLayoutBinding[0].setStageFlags(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
 	uboLayoutBinding[0].setPImmutableSamplers(nullptr); // Optional
 
+	// Storage Buffer Layout
+	uboLayoutBinding[1].setBinding(1);
+	uboLayoutBinding[1].setDescriptorType(vk::DescriptorType::eStorageBuffer);
+	uboLayoutBinding[1].setDescriptorCount(1);	// if it is an array of objects
+	uboLayoutBinding[1].setStageFlags(vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment);
+	uboLayoutBinding[1].setPImmutableSamplers(nullptr); // Optional
+	
 	return uboLayoutBinding;
+}
+
+std::vector<vk::DescriptorPoolSize> SphereShaderObject::getUniformDescriptorPoolSizes(uint32_t const swapChainSize) const 
+{
+	std::vector<vk::DescriptorPoolSize> poolSize;
+	poolSize.resize(2);
+
+	// Uniform Buffer
+	poolSize[0].setType(vk::DescriptorType::eUniformBuffer);
+	poolSize[0].setDescriptorCount(swapChainSize);
+
+	// Storage Buffer
+	poolSize[1].setType(vk::DescriptorType::eStorageBuffer);
+	poolSize[1].setDescriptorCount(swapChainSize);
+
+	return poolSize;
 }
 
 #include "sphere_shader_vert.h"
