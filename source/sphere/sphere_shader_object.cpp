@@ -12,10 +12,10 @@ SphereShaderObject::SphereShaderObject(size_t const vertexBufferSize, size_t con
     : mVertexBufferSize(vertexBufferSize),
       mColorBufferSize(colorBufferSize)
 {
-	if(vertexBufferSize != mColorBufferSize * 6)
-	{
-		throw std::exception("mIndexBufferSize != mColorBufferSize * 6");
-	}
+	// if(vertexBufferSize != mColorBufferSize * 6)
+	// {
+	// 	throw std::exception("mIndexBufferSize != mColorBufferSize * 6");
+	// }
 }
 
 
@@ -36,7 +36,7 @@ void SphereShaderObject::setup(RenderEngineInterface & engine)
         mUniformBuffer.getBuffers(),
         sizeof(UnformBuffer),
 		mColorBuffer2.getBuffers(),
-		sizeof(ColorBufferElement2) * mColorBufferSize);
+		sizeof(ColorBufferElement) * mColorBufferSize);
 
     // pipeline
     mPipeline.createGraphicsPipeline(engine, 
@@ -61,8 +61,8 @@ void SphereShaderObject::draw(RenderEngineInterface & engine, size_t const image
 			mVertexBuffer.update(engine, imageIndex, initVertexBuffer);
 		}
 
-		if(initColorBuffer2){
-			mColorBuffer2.update(engine, imageIndex, initColorBuffer2);
+		if(initColorBuffer){
+			mColorBuffer2.update(engine, imageIndex, initColorBuffer);
 		}
 	}
 
@@ -71,8 +71,8 @@ void SphereShaderObject::draw(RenderEngineInterface & engine, size_t const image
 		mVertexBuffer.update(engine, imageIndex, updateVertexBuffer);
 	}
 
-	if(updateColorBuffer2){
-		mColorBuffer2.update(engine, imageIndex, updateColorBuffer2);
+	if(updateColorBuffer){
+		mColorBuffer2.update(engine, imageIndex, updateColorBuffer);
 	}
 
 	if(updateUniformBuffer){
@@ -206,5 +206,5 @@ std::span<char const> SphereShaderObject::getFragmentShaderCode() const
 
 vk::PrimitiveTopology SphereShaderObject::getInputTopology() const
 {
-	return vk::PrimitiveTopology::eTriangleList;
+	return vk::PrimitiveTopology::ePointList;
 }

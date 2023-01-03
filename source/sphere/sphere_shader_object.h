@@ -25,7 +25,7 @@ public:
 		glm::vec3 normal;
 	};
 
-	struct ColorBufferElement2 {
+	struct ColorBufferElement {
 		// glm::vec3 color;
 		alignas(4) float r;
 		alignas(4) float g;
@@ -41,11 +41,11 @@ public:
 	};
 
 	Delegate<void(std::span<VertexBufferElement>)> updateVertexBuffer;
-	Delegate<void(std::span<ColorBufferElement2>)>  updateColorBuffer2;
+	Delegate<void(std::span<ColorBufferElement>)>  updateColorBuffer;
 	Delegate<void(std::span<UnformBuffer>)> updateUniformBuffer;
 
 	Delegate<void(std::span<VertexBufferElement>)> initVertexBuffer;
-	Delegate<void(std::span<ColorBufferElement2>)>  initColorBuffer2;
+	Delegate<void(std::span<ColorBufferElement>)>  initColorBuffer;
 
 	SphereShaderObject(size_t const vertexBufferSize, size_t const colorBufferSize);
 
@@ -61,7 +61,7 @@ private:
 	uint32_t mInit = 0;
 
     MemoryMappedBuffer<VertexBufferElement> mVertexBuffer { vk::BufferUsageFlagBits::eVertexBuffer };
-    MemoryMappedBuffer<ColorBufferElement2> mColorBuffer2 { vk::BufferUsageFlagBits::eStorageBuffer };
+    MemoryMappedBuffer<ColorBufferElement> mColorBuffer2 { vk::BufferUsageFlagBits::eStorageBuffer };
     MemoryMappedBuffer<UnformBuffer> mUniformBuffer { vk::BufferUsageFlagBits::eUniformBuffer };
 
     SimpleDescriptorSetLayout mDescriptorSetLayout;

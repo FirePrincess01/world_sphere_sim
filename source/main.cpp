@@ -9,7 +9,8 @@
 #include "vulkan_particle_engine/shader/simple_shader.h"
 #include "vulkan_particle_engine/object/simple_object/hello_triangle.h"
 #include "sphere/sphere_shader_object.h"
-#include "cube.h"
+#include "geometry/cube.h"
+#include "geometry/sphere.h"
 
 #include <iostream>
 
@@ -25,8 +26,8 @@ public:
       mView(view),
       mProj(proj)
     {
-        mShaderObject.updateVertexBuffer.set<&Cube::updateVertexData>(*this);
-        mShaderObject.updateColorBuffer2.set<&Cube::updateColorData2>(*this);
+        mShaderObject.initVertexBuffer.set<&Cube::initVertexData>(*this);
+        mShaderObject.updateColorBuffer.set<&Cube::updateColorData2>(*this);
         mShaderObject.updateUniformBuffer.set<&Cube::updateUniformData>(*this);
     }
 
@@ -34,7 +35,7 @@ public:
         return mShaderObject;
     }
 
-    void updateVertexData(std::span<SphereShaderObject::VertexBufferElement> data)
+    void initVertexData(std::span<SphereShaderObject::VertexBufferElement> data)
     {
         assert(data.size() == cube_vertices.size());
         for(size_t i = 0; i < data.size(); ++i)
@@ -43,7 +44,7 @@ public:
         }
     }
 
-    void updateColorData2(std::span<SphereShaderObject::ColorBufferElement2> data)
+    void updateColorData2(std::span<SphereShaderObject::ColorBufferElement> data)
     {
         assert(data.size() == cube_colors2.size());
         for(size_t i = 0; i < data.size(); ++i)
@@ -69,19 +70,8 @@ public:
 private:
     std::vector<AdvancedShader::VertexBufferElement> const vertexData;
 
-    std::array<glm::vec3, 36> const cube_vertices = createCubeTriangles();
-    std::array<uint32_t, 36> const cube_indices = createCubeIndices();
-
-    std::array<glm::vec3, 8>  const cube_colors = {
-        glm::vec3(0.5f, 0.5f, 0.5f),
-        glm::vec3(0.1f, 0.5f, 0.5f),
-        glm::vec3(0.5f, 0.1f, 0.5f),
-        glm::vec3(0.5f, 0.5f, 0.1f),
-        glm::vec3(0.5f, 0.1f, 0.1f),
-        glm::vec3(0.1f, 0.1f, 0.5f),
-        glm::vec3(0.1f, 0.5f, 0.1f),
-        glm::vec3(0.5f, 0.5f, 1.0f)
-    };
+    // std::array<glm::vec3, 36> const cube_vertices = createCubeTriangles();
+    std::vector<glm::vec3> const cube_vertices = flatSphereData(createSphereVertices(2.0f, 10));
 
     std::array<glm::vec3, 6>  const cube_colors2 = {
         glm::vec3(0.5f, 0.5f, 0.5f),
@@ -105,7 +95,7 @@ private:
 
 int main()
 {
-    cout << "Hello World!" << endl;
+    cout << "#######------- World Sphere Sim -------#######" << endl;
 
     glm::mat4 view = glm::mat4(1);
     glm::mat4 proj = glm::mat4(1);
